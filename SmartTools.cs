@@ -6,13 +6,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Management;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 
-namespace SSDTool
+namespace SSDStressTest
 {
 
     public enum SmartAttributeType : byte

@@ -68,6 +68,7 @@
     <Content Include="1438107894_match.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BenchmarkWorker.cs" />
     <Compile Include="Disk.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
