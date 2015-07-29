@@ -39,10 +39,14 @@ Use the tool of your choice to plot this data.
 
 ## License
 This project is partially based on the work from other people.
-### SmartTools.cs
-(c) Microsoft Corporation, Author: Clemens Vasters (clemensv@microsoft.com)
+### SmartTools.cs (modified)
+(C) Microsoft Corporation, Author: Clemens Vasters (clemensv@microsoft.com)
 
 Code subject to MS-PL: http://opensource.org/licenses/ms-pl.html 
+
+### Options.cs
+
+Copyright (C) 2008 Novell (http://www.novell.com), Copyright (C) 2009 Federico Di Gregorio, Copyright (C) 2012 Xamarin Inc (http://www.xamarin.com)
 
 ### Icon 
 License: Creative Commons (Attribution 3.0 Unported)
