@@ -181,37 +181,30 @@ namespace SSDStressTest
         {
             var result = new Dictionary<string, int>();
 
-           // try
-           // {
-                var searcher = new ManagementObjectSearcher("root\\WMI", "SELECT * FROM MSStorageDriver_ATAPISmartData  WHERE InstanceName='" + disk.pnpId.Replace("\\", "\\\\") + "_0" + "'");
+            var searcher = new ManagementObjectSearcher("root\\WMI", "SELECT * FROM MSStorageDriver_ATAPISmartData  WHERE InstanceName='" + disk.pnpId.Replace("\\", "\\\\") + "_0" + "'");
 
-                foreach (ManagementObject queryObj in searcher.Get())
+            foreach (ManagementObject queryObj in searcher.Get())
+            {
+                var arrVendorSpecific = (byte[])queryObj.GetPropertyValue("VendorSpecific");
+
+                // Create SMART data from 'vendor specific' array
+                var d = new SmartData(arrVendorSpecific);
+                foreach (var b in d.Attributes)
                 {
-                    var arrVendorSpecific = (byte[])queryObj.GetPropertyValue("VendorSpecific");
-
-                    // Create SMART data from 'vendor specific' array
-                    var d = new SmartData(arrVendorSpecific);
-                    foreach (var b in d.Attributes)
+                    if (twoByteValues)
                     {
-                        if (twoByteValues)
-                        {
-                            byte[] data = { b.VendorData[0], b.VendorData[1] };
-                            var decVal = BitConverter.ToInt16(data, 0);
-                            result.Add(b.AttributeType.ToString(), decVal);
-                        }
-                        else
-                        {
-                            var decVal = BitConverter.ToInt32(b.VendorData, 0);
-                            result.Add(b.AttributeType.ToString(), decVal);
-                        }
+                        byte[] data = { b.VendorData[0], b.VendorData[1] };
+                        var decVal = BitConverter.ToInt16(data, 0);
+                        result.Add(b.AttributeType.ToString(), decVal);
                     }
-
+                    else
+                    {
+                        var decVal = BitConverter.ToInt32(b.VendorData, 0);
+                        result.Add(b.AttributeType.ToString(), decVal);
+                    }
                 }
-           // }
-           // catch (ManagementException e)
-           // {
-           //     Console.WriteLine("An error occurred while querying for WMI data: " + e.Message);
-           // }
+
+            }
 
             disk.smartData = result;
         }

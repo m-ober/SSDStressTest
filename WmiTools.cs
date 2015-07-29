@@ -39,7 +39,6 @@ namespace SSDStressTest
                     " (" + Math.Round(Convert.ToDouble(objhdd["Size"]) / 1073741824, 1) + " GB)";
 
                 Console.WriteLine(DiskName);
-                //Console.WriteLine(objhdd["PNPDeviceID"]);
 
                 var ObjCount = Convert.ToInt16(objhdd["Partitions"]);
 
