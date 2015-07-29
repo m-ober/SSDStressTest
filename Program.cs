@@ -5,9 +5,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Timers;
+using System.Text.RegularExpressions;
 
 namespace SSDTool
 {
@@ -148,9 +150,9 @@ namespace SSDTool
         private static string driveLetter = null;
         private static int timeOut = 0;
         private static string outputFile = null;
-        private static string smartParam = null;
-        private static int howLong = 0;
+        private static int howLong = 1;
         private static bool fourBytes = false;
+        private static List<String> smartParams = new List<String>();
 
         private static StreamWriter logfile;
         private static CultureInfo us = new CultureInfo("en-US");
@@ -158,22 +160,23 @@ namespace SSDTool
         private static void queryData(object source, ElapsedEventArgs e)
         {
             SmartTools.loadSmartData(disk, !fourBytes);
-            int x = -1;
-            if (disk.smartData != null)
+            StringBuilder logstring = new StringBuilder();
+
+            logstring.Append((e.SignalTime - start_time).TotalSeconds.ToString(us)).Append(",");
+            logstring.Append(worker.GetWrittenMBytes().ToString(us)).Append(",");
+            logstring.Append(worker.GetPerformance().ToString(us)).Append(",");
+            logstring.Append(worker.GetInstPerformance().ToString(us)).Append(",");
+            for (int i = 0; i < smartParams.Count; i++)
             {
-                disk.smartData.TryGetValue(smartParam, out x);
+                logstring.Append(disk.smartData[smartParams[i]]);
+                if (i < smartParams.Count - 1)
+                    logstring.Append(",");
             }
+            logstring.Append(Environment.NewLine);
 
-            var logdata = string.Format("{0},{1},{2},{3},{4}{5}",
-                (e.SignalTime - start_time).TotalSeconds.ToString(us),
-                worker.GetWrittenMBytes().ToString(us),
-                worker.GetPerformance().ToString(us),
-                worker.GetInstPerformance().ToString(us),
-                x.ToString(us),
-                Environment.NewLine);
-
-            logfile.Write(logdata);
-            Console.Write(logdata);
+            String s = logstring.ToString();
+            logfile.Write(s);
+            Console.Write(s);
         }
         static void ShowHelp(OptionSet p)
         {
@@ -188,17 +191,17 @@ namespace SSDTool
 
             var p = new OptionSet() 
             {
-                { "d|drive=", "Drive letter to test (required)",
+                { "d|drive=", "Drive letter to test (REQUIRED)",
                   v => driveLetter = v.ToUpper() },
-                { "s|smart:", "SMART value to log\nwithout value, available values are listed",
-                  v => smartParam = v },
+                { "s|smart:", "SMART value to log (REQUIRED)\nWithout value, available values are listed",
+                  v => smartParams.Add(v) },
                 { "4|four", "Interpret SMART values as 4 bytes\n(otherwise 2, default)",
                   v => fourBytes = v != null},
-                { "t|timeout=", "Timeout between measurements (in ms)\nmust be >= 500 (default 2000)",
+                { "t|timeout=", "Timeout between measurements (in ms)\nMust be >= 500 (default 2000)",
                   (int v) => timeOut = v },
-                { "l|limit=", "Time in minutes to run the test\nZero means indefinite (default 0)",
+                { "l|limit=", "Time in minutes to run the test\nZero means indefinite (default 1)",
                   (int v) => howLong = v },
-                { "o|output=", "Output CSV file name (default results.csv)",
+                { "o|output=", "Output CSV file name",
                   v =>  outputFile = v},
                 { "h|help",  "Show help", 
                   v => show_help = v != null },
@@ -211,8 +214,6 @@ namespace SSDTool
                     show_help = true;
                 if (timeOut < 500)
                     timeOut = 2000;
-                if (outputFile == null)
-                    outputFile = "results.csv";
                 if (howLong < 0)
                     show_help = true;
             }
@@ -250,16 +251,19 @@ namespace SSDTool
                 }
             }
 
-            if (!show_help && smartParam != null)
+            if (!show_help && smartParams.Count > 0)
             {
-                if (!disk.smartData.ContainsKey(smartParam))
+                foreach (var par in smartParams)
+                if (!disk.smartData.ContainsKey(par))
                 {
-                    Console.WriteLine("Error: Smart parameter not found.");
-                    smartParam = null;
+                    Console.WriteLine("Error: Smart parameter not found: " + par);
+                    Console.WriteLine();
+                    smartParams.Clear();
+                    break;
                 }
             }
 
-            if (!show_help && smartParam == null)
+            if (!show_help && smartParams.Count == 0)
             {
                 Console.WriteLine("Listing available SMART parameters");
                 Console.WriteLine();
@@ -269,6 +273,15 @@ namespace SSDTool
 
             if (!show_help)
             {
+                if (outputFile == null)
+                {
+                    int i = 0;
+                    do
+                    {
+                        outputFile = Regex.Replace(disk.productName, @"[^A-Za-z0-9]+", "_") + "_" + i + ".csv";
+                        i++;
+                    } while (File.Exists(outputFile));
+                }
                 try
                 {
                     logfile = new StreamWriter(outputFile);
@@ -294,20 +307,27 @@ namespace SSDTool
 
         static void Main(string[] args)
         {
-            Console.WriteLine("SSD Stress Tester - https://github.com/m-ober");
+            Console.WriteLine("SSD Stress Tester - https://github.com/m-ober/SSDStressTest");
             Console.WriteLine("USE AT YOUR OWN RISK! THIS TOOL MAY DAMAGE YOUR DRIVE!");
             Console.WriteLine("");
 
             if (parseParameters(args))
             {
-                logfile.WriteLine("Logging started on " + DateTime.Now);
-                logfile.WriteLine("Product name: " + disk.productName);
-                logfile.WriteLine("Disk PNP ID: " + disk.pnpId);
-                logfile.WriteLine("Time,WrittenMByte,Performance,InstPerformance,SMART");
+                StringBuilder header = new StringBuilder();
+                header.AppendLine("'Log file name: " + outputFile);
+                header.AppendLine("'Logging started on " + DateTime.Now);
+                header.AppendLine("'Product name: " + disk.productName);
+                header.AppendLine("'Disk PNP ID: " + disk.pnpId);
+                if (howLong > 0)
+                    header.AppendLine("'Running test for " + howLong + " minute(s)");
+                else
+                    header.AppendLine("'Running test until stopped (press ESC).");
+                header.AppendLine("Time,MBytesWritten,Performance,InstPerformance,"
+                    + String.Join(",", smartParams));
 
-                Console.WriteLine("Log to file: " + outputFile);
-                Console.WriteLine("Logging started on " + DateTime.Now);
-                Console.WriteLine("Product name: " + disk.productName);
+                string s = header.ToString();
+                logfile.Write(s);
+                Console.Write(s);
                 Console.WriteLine();
 
                 start_time = DateTime.Now;
