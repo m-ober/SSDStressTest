@@ -1,6 +1,6 @@
 # SSDStressTest
 
-Solid State Drive (SSD) Stress Testing Tool. Continuously write to the drive while monitoring SMART.
+Solid State Drive (SSD) Stress Testing Tool. Continuously write to the drive while monitoring one or more SMART values.
 
 ## Usage
 _WARNING! Using this tool will degrade the lifespan of your drive. Also this tool may heat up the drive until it fails. Use at your own risk and only if you know what you are doing._
