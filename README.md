@@ -14,8 +14,11 @@ _WARNING! Using this tool will degrade the lifespan of your drive. Also this too
                                  Must be >= 500 (default 2000)
     -l, --limit=VALUE          Time in minutes to run the test
                                  Zero means indefinite (default 1)
+    -b, --blocksize=VALUE      Blocksize in KByte (default 16 MByte)
+    -k, --testsize=VALUE       Testsize in KByte (default 512 MByte)
     -o, --output=VALUE         Output CSV file name
     -h, --help                 Show help
+
     
 ### Example
 Starting the tool using:
