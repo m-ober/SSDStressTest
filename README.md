@@ -40,6 +40,12 @@ Will test drive/partition C: and monitor the SMART values "PowerOnHoursPOH" and 
     
 Use the tool of your choice to plot this data.
 
+### Download
+
+Binaries can be found here: https://github.com/m-ober/SSDStressTest/releases
+
+(.NET 4.0 required)
+
 ## License
 This project is partially based on the work from other people.
 ### SmartTools.cs (modified)
