@@ -96,10 +96,20 @@ namespace SSDStressTest
 
         }
 
-        public void setDrive(string driveLetter)
+        public void SetDrive(string driveLetter)
         {
             this.filename = driveLetter + @":\evndnj9e19t7ef9mexd3.dat";
         }
+
+        public void SetBlocksize(int blocksize_kbytes)
+        {
+            this.blocksize = (long)(1024 * blocksize_kbytes);
+        }
+        public void SetTestSize(int testsize_kbytes)
+        {
+            this.numblocks = (long)(testsize_kbytes * 1024 / this.blocksize);
+        }
+
         public void RequestStop()
         {
             Console.WriteLine("Shutting down worker thread...");
