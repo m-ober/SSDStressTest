@@ -2,6 +2,8 @@
 
 Solid State Drive (SSD) Stress Testing Tool. Continuously write to the drive while monitoring one or more SMART values.
 
+![Example](http://www.hardwareluxx.de/images/stories/galleries/reviews/samsung-sm951/temperature/en_sm951-no-cooling-500.png)
+
 ## Usage
 _WARNING! Using this tool will degrade the lifespan of your drive. Also this tool may heat up the drive until it fails. Use at your own risk and only if you know what you are doing._
 
