@@ -10,33 +10,38 @@ _WARNING! Using this tool will degrade the lifespan of your drive. Also this too
                                  Without value, available values are listed
     -4, --four                 Interpret SMART values as 4 bytes
                                  (otherwise 2, default)
-    -t, --timeout=VALUE        Timeout between measurements (in ms)
+    -i, --interval=VALUE       Timeout between measurements (in ms)
                                  Must be >= 500 (default 2000)
     -l, --limit=VALUE          Time in minutes to run the test
                                  Zero means indefinite (default 1)
-    -b, --blocksize=VALUE      Blocksize in KByte (default 16 MByte)
-    -k, --testsize=VALUE       Testsize in KByte (default 512 MByte)
+    -b, --blocksize=VALUE      Blocksize in K/M/G Byte (default 16 MByte)
+    -t, --testsize=VALUE       Testsize in K/M/G Byte (default 512 MByte)
     -o, --output=VALUE         Output CSV file name
     -h, --help                 Show help
-
     
 ### Example
 Starting the tool using:
 
-    SSDStressTest.exe --drive=c --smart=PowerOnHoursPOH --smart=PowerCycleCount
+    SSDStressTest.exe --drive=C --smart=PowerOnHoursPOH --blocksize=8m --interval=10000
     
 Will test drive/partition C: and monitor the SMART values "PowerOnHoursPOH" and "PowerCycleCount" (just for an example, monitoring these values is pointless.). An output file will then be generated:
 
     'Log file name: Corsair_Performance_Pro_0.csv
-    'Logging started on 29.07.2015 11:40:36
+    'Logging started on 04.08.2015 17:23:16
     'Product name: Corsair Performance Pro
     'Disk PNP ID: IDE\DISKCORSAIR_PERFORMANCE_PRO_________________1.0_____\5&61C381C&0&0.0.0
+    'Blocksize: 8 MByte
+    'Testsize: 512 MByte
+    'Free disk space: 86.646 GByte
+    'Total disk space: 238.374 GByte
     'Running test for 1 minute(s)
-    Time,MBytesWritten,Performance,InstPerformance,PowerOnHoursPOH,PowerCycleCount
-    2.0041147,336,190.39,190.39,4020,936
-    4.0162298,656,173.83,159.28,4020,936
-    6.0283449,992,171.15,166.17,4020,936
-    [lines omitted]
+    Time,MBytesWritten,Performance,InstPerformance,PowerOnHoursPOH
+    10.0915772,1712,173.89,173.89,4032
+    20.0781484,3456,174.03,174.18,4032
+    30.1017217,4864,162.82,140.58,4032
+    40.1002936,6712,168.28,184.59,4032
+    50.0968654,8320,166.84,161.08,4032
+    60.1584409,9168,153.82,87.11,4032
     
 Use the tool of your choice to plot this data.
 
