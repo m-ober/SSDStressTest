@@ -36,7 +36,7 @@ namespace SSDStressTest
             SmartTools.loadSmartData(disk, !fourBytes);
             StringBuilder logstring = new StringBuilder();
 
-            logstring.Append((e.SignalTime - start_time).TotalSeconds.ToString(us)).Append(",");
+            logstring.Append((DateTime.Now - start_time).TotalSeconds.ToString(us)).Append(",");
             logstring.Append(worker.GetWrittenMBytes().ToString(us)).Append(",");
             logstring.Append(worker.GetPerformance().ToString(us)).Append(",");
             logstring.Append(worker.GetInstPerformance().ToString(us)).Append(",");
@@ -343,7 +343,7 @@ namespace SSDStressTest
                     if (Console.KeyAvailable && Console.ReadKey(true).Key == ConsoleKey.Escape)
                         break;
 
-                    if (howLong > 0 && (DateTime.Now - start_time).TotalMinutes > howLong)
+                    if (howLong > 0 && Math.Floor((DateTime.Now - start_time).TotalSeconds) > howLong * 60)
                         break;
 
                     Thread.Sleep(100);
