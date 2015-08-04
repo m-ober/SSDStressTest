@@ -29,9 +29,11 @@ namespace SSDStressTest
 
         private object _lock = new object();
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
-        public static extern SafeFileHandle CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode,
-            IntPtr SecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto,
+            CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        public static extern SafeFileHandle CreateFile(string lpFileName, uint dwDesiredAccess,
+            uint dwShareMode, IntPtr SecurityAttributes, uint dwCreationDisposition,
+            uint dwFlagsAndAttributes, IntPtr hTemplateFile);
 
         public void DoWork()
         {
@@ -75,7 +77,9 @@ namespace SSDStressTest
                         }
 
                         performance = (blocksize * blockswritten / 1048576.0) / last_measurement;
-                        inst_performance = (blocksize * inst_blockswritten / 1048576.0) / (last_measurement - inst_measurement);
+
+                        inst_performance = (blocksize * inst_blockswritten / 1048576.0) /
+                            (last_measurement - inst_measurement);
                     }
 
                     if (blockindex++ == numblocks)
@@ -101,13 +105,13 @@ namespace SSDStressTest
             this.filename = driveLetter + @":\evndnj9e19t7ef9mexd3.dat";
         }
 
-        public void SetBlocksize(int blocksize_kbytes)
+        public void SetBlocksize(long blocksize_bytes)
         {
-            this.blocksize = (long)(1024 * blocksize_kbytes);
+            this.blocksize = blocksize_bytes;
         }
-        public void SetTestSize(int testsize_kbytes)
+        public void SetTestSize(long testsize_bytes)
         {
-            this.numblocks = (long)(testsize_kbytes * 1024 / this.blocksize);
+            this.numblocks = testsize_bytes / this.blocksize;
         }
 
         public void RequestStop()

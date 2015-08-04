@@ -24,8 +24,8 @@ namespace SSDStressTest
         private static string outputFile = null;
         private static int howLong = 1;
         private static bool fourBytes = false;
-        private static int blocksize_k = 0;
-        private static int testsize_k = 0;
+        private static long blocksize_b = 0;
+        private static long testsize_b = 0;
         private static List<String> smartParams = new List<String>();
 
         private static StreamWriter logfile;
@@ -55,13 +55,14 @@ namespace SSDStressTest
         static void ShowHelp(OptionSet p)
         {
             Console.WriteLine();
-            Console.WriteLine(String.Format("Example: {0} --drive=c --smart=Temperature", System.AppDomain.CurrentDomain.FriendlyName));
+            Console.WriteLine(String.Format("Example: {0} --drive=c --smart=Temperature",
+                System.AppDomain.CurrentDomain.FriendlyName));
             Console.WriteLine();
             Console.WriteLine("Help:");
             p.WriteOptionDescriptions(Console.Out);
         }
 
-        static string FormatSize(int bytes)
+        static string FormatSize(double bytes)
         {
             string[] suffix = {"Byte", "KByte", "MByte", "GByte"};
             int i = 0;
@@ -71,7 +72,34 @@ namespace SSDStressTest
                     break;
                 bytes /= 1024;
             }
-            return String.Format("{0} {1}", bytes, suffix[i]);
+            return String.Format("{0} {1}", Math.Round(bytes,3).ToString(us), suffix[i]);
+        }
+
+        static long ParseSize(string str)
+        {
+            string suffix = str.Substring(str.Length - 1).ToUpperInvariant();
+            long mult = 1;
+            long bytes = 0;
+
+            switch (suffix)
+            {
+                case "G": mult *= 1073741824; break;
+                case "M": mult *= 1048576; break;
+                case "K": mult *= 1024; break;
+            }
+            try
+            {
+                if (mult > 1)
+                    bytes = Convert.ToInt64(str.Substring(0, str.Length - 1));
+                else
+                    bytes = Convert.ToInt64(str);
+            }
+            catch (Exception e)
+            {
+                return -1;
+            }
+
+            return bytes * mult;
         }
 
         static bool parseParameters(string[] args)
@@ -79,27 +107,45 @@ namespace SSDStressTest
             bool show_help = false;
             int timeout_default = 2000;
             int limit_default = 1;
-            int blocksize_default = 16 * 1024;
-            int testsize_default = 512 * 1024;
+            long blocksize_default = ParseSize("16M");
+            long testsize_default = ParseSize("512M");
+            string blocksize_str = null;
+            string testsize_str = null;
 
             var p = new OptionSet() 
             {
                 { "d|drive=", "Drive letter to test (REQUIRED)",
                   v => driveLetter = v.ToUpper() },
+
                 { "s|smart:", "SMART value to log (REQUIRED)\nWithout value, available values are listed",
                   v => smartParams.Add(v) },
+
                 { "4|four", "Interpret SMART values as 4 bytes\n(otherwise 2, default)",
                   v => fourBytes = v != null},
-                { "t|timeout=", String.Format("Timeout between measurements (in ms)\nMust be >= 500 (default {0})", timeout_default),
+
+                { "i|interval=",
+                    String.Format("Timeout between measurements (in ms)\nMust be >= 500 (default {0})",
+                    timeout_default),
                   (int v) => timeOut = v },
-                { "l|limit=", String.Format("Time in minutes to run the test\nZero means indefinite (default {0})", limit_default),
+
+                { "l|limit=",
+                    String.Format("Time in minutes to run the test\nZero means indefinite (default {0})",
+                    limit_default),
                   (int v) => howLong = v },
-                { "b|blocksize=", String.Format("Blocksize in KByte (default {0})", FormatSize(blocksize_default*1024)),
-                  (int v) => blocksize_k = v },
-                { "k|testsize=", String.Format("Testsize in KByte (default {0})", FormatSize(testsize_default*1024)),
-                  (int v) => testsize_k = v },
+
+                { "b|blocksize=",
+                    String.Format("Blocksize in K/M/G Byte (default {0})",
+                    FormatSize(blocksize_default)),
+                  v => blocksize_str = v },
+
+                { "t|testsize=",
+                    String.Format("Testsize in K/M/G Byte (default {0})",
+                    FormatSize(testsize_default)),
+                  v => testsize_str = v },
+
                 { "o|output=", "Output CSV file name",
                   v =>  outputFile = v},
+
                 { "h|help",  "Show help", 
                   v => show_help = v != null },
             };
@@ -113,12 +159,34 @@ namespace SSDStressTest
                     timeOut = timeout_default;
                 if (howLong < 0)
                     show_help = true;
-                if (blocksize_k <= 0)
-                    blocksize_k = blocksize_default;
-                if (testsize_k <= 0)
-                    testsize_k = testsize_default;
-                if (testsize_k < blocksize_k)
-                    testsize_k = blocksize_k;
+
+                if (blocksize_str == null)
+                {
+                    blocksize_b = blocksize_default;
+                }
+                else
+                {
+                    blocksize_b = ParseSize(blocksize_str);
+                    if (blocksize_b <= 0)
+                    {
+                        Console.WriteLine("Invalid blocksize");
+                        show_help = true;
+                    }
+                }
+
+                if (testsize_str == null)
+                {
+                    testsize_b = testsize_default;
+                }
+                else
+                {
+                    testsize_b = ParseSize(testsize_str);
+                    if (testsize_b <= 0)
+                    {
+                        Console.WriteLine("Invalid testsize");
+                        show_help = true;
+                    }
+                }
             }
             catch (OptionException e)
             {
@@ -181,7 +249,8 @@ namespace SSDStressTest
                     int i = 0;
                     do
                     {
-                        outputFile = Regex.Replace(disk.productName, @"[^A-Za-z0-9]+", "_") + "_" + i + ".csv";
+                        outputFile = Regex.Replace(disk.productName, @"[^A-Za-z0-9]+", "_")
+                            + "_" + i + ".csv";
                         i++;
                     } while (File.Exists(outputFile));
                 }
@@ -221,8 +290,8 @@ namespace SSDStressTest
                 header.AppendLine("'Logging started on " + DateTime.Now);
                 header.AppendLine("'Product name: " + disk.productName);
                 header.AppendLine("'Disk PNP ID: " + disk.pnpId);
-                header.AppendLine("'Blocksize: " + FormatSize(blocksize_k*1024));
-                header.AppendLine("'Testsize: " + FormatSize(testsize_k*1024));
+                header.AppendLine("'Blocksize: " + FormatSize(blocksize_b));
+                header.AppendLine("'Testsize: " + FormatSize(testsize_b));
                 if (howLong > 0)
                     header.AppendLine("'Running test for " + howLong + " minute(s)");
                 else
@@ -242,11 +311,11 @@ namespace SSDStressTest
 
                 worker = new BenchmarkWorker();
                 worker.SetDrive(driveLetter);
-                worker.SetBlocksize(blocksize_k);
-                worker.SetTestSize(testsize_k);
+                worker.SetBlocksize(blocksize_b);
+                worker.SetTestSize(testsize_b);
                 workerThread = new Thread(worker.DoWork);
                 workerThread.Start();
-                Console.WriteLine("Main thread: Starting worker thread...");
+                Console.WriteLine("Starting benchmark...");
                 while (!workerThread.IsAlive) ;
 
                 while (true)
@@ -263,7 +332,7 @@ namespace SSDStressTest
                 worker.RequestStop();
                 queryTimer.Enabled = false;
                 workerThread.Join();
-                Console.WriteLine("Main thread: Worker thread has terminated.");
+                Console.WriteLine("Test stopped.");
 
                 logfile.Close();
 

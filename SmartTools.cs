@@ -89,7 +89,8 @@ namespace SSDStressTest
             {
                 var a = FromBytes<SmartAttribute>(arrVendorSpecific, ref offset, 12);
                 // Attribute values 0x00, 0xfe, 0xff are invalid
-                if (a.AttributeType != 0x00 && (byte)a.AttributeType != 0xfe && (byte)a.AttributeType != 0xff)
+                if (a.AttributeType != 0x00 && (byte)a.AttributeType != 0xfe &&
+                    (byte)a.AttributeType != 0xff)
                 {
                     attributes[a.AttributeType] = a;
                 }
@@ -181,7 +182,9 @@ namespace SSDStressTest
         {
             var result = new Dictionary<string, int>();
 
-            var searcher = new ManagementObjectSearcher("root\\WMI", "SELECT * FROM MSStorageDriver_ATAPISmartData  WHERE InstanceName='" + disk.pnpId.Replace("\\", "\\\\") + "_0" + "'");
+            var searcher = new ManagementObjectSearcher(
+                "root\\WMI", "SELECT * FROM MSStorageDriver_ATAPISmartData  WHERE InstanceName='" +
+                disk.pnpId.Replace("\\", "\\\\") + "_0" + "'");
 
             foreach (ManagementObject queryObj in searcher.Get())
             {

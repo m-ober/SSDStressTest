@@ -8,7 +8,8 @@ namespace SSDStressTest
         private static String GetPartName(String inp)
         {
             String Dependent = "", ret = "";
-            ManagementObjectSearcher LogicalDisk = new ManagementObjectSearcher("Select * from Win32_LogicalDiskToPartition");
+            ManagementObjectSearcher LogicalDisk =
+                new ManagementObjectSearcher("Select * from Win32_LogicalDiskToPartition");
             foreach (ManagementObject drive in LogicalDisk.Get())
             {
                 if (drive["Antecedent"].ToString().Contains(inp))
@@ -35,7 +36,8 @@ namespace SSDStressTest
             foreach (ManagementObject objhdd in hdd.Get())
             {
                 PartState = "";
-                DiskName = "Disk " + objhdd["Index"].ToString() + ": " + objhdd["Caption"].ToString().Replace(" ATA Device", "") +
+                DiskName = "Disk " + objhdd["Index"].ToString() + ": " + 
+                    objhdd["Caption"].ToString().Replace(" ATA Device", "") +
                     " (" + Math.Round(Convert.ToDouble(objhdd["Size"]) / 1073741824, 1) + " GB)";
 
                 Console.WriteLine(DiskName);
