@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace SSDStressTest
@@ -19,6 +20,12 @@ namespace SSDStressTest
                     sb.Append(item.Key).Append(": ").Append(item.Value).AppendLine();
             }
             return sb.ToString();
+        }
+        public void QuerySpace(out long freespace, out long totalspace)
+        {
+            DriveInfo di = new DriveInfo(this.driveLetter);
+            freespace = di.AvailableFreeSpace;
+            totalspace = di.TotalSize;
         }
     }
 }

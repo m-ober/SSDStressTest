@@ -83,9 +83,9 @@ namespace SSDStressTest
 
             switch (suffix)
             {
-                case "G": mult *= 1073741824; break;
-                case "M": mult *= 1048576; break;
-                case "K": mult *= 1024; break;
+                case "G": mult = 1073741824; break;
+                case "M": mult = 1048576; break;
+                case "K": mult = 1024; break;
             }
             try
             {
@@ -222,12 +222,26 @@ namespace SSDStressTest
                 }
             }
 
+            if (!show_help)
+            {
+                long free;
+                long total;
+                disk.QuerySpace(out free, out total);
+                if (testsize_b > free)
+                {
+                    Console.WriteLine(
+                        String.Format("ERROR: Testsize ({0}) larger than free space on drive ({1})",
+                        FormatSize(testsize_b), FormatSize(free)));
+                    show_help = true;
+                }
+            }
+
             if (!show_help && smartParams.Count > 0)
             {
                 foreach (var par in smartParams)
                 if (!disk.smartData.ContainsKey(par))
                 {
-                    Console.WriteLine("Error: Smart parameter not found: " + par);
+                    Console.WriteLine("ERROR: Smart parameter not found: " + par);
                     Console.WriteLine();
                     smartParams.Clear();
                     break;
@@ -285,13 +299,19 @@ namespace SSDStressTest
 
             if (parseParameters(args))
             {
+                long free;
+                long total;
+                disk.QuerySpace(out free, out total);
+
                 StringBuilder header = new StringBuilder();
-                header.AppendLine("'Log file name: " + outputFile);
-                header.AppendLine("'Logging started on " + DateTime.Now);
-                header.AppendLine("'Product name: " + disk.productName);
-                header.AppendLine("'Disk PNP ID: " + disk.pnpId);
-                header.AppendLine("'Blocksize: " + FormatSize(blocksize_b));
-                header.AppendLine("'Testsize: " + FormatSize(testsize_b));
+                header.AppendLine("'Log file name: " + outputFile)
+                .AppendLine("'Logging started on " + DateTime.Now)
+                .AppendLine("'Product name: " + disk.productName)
+                .AppendLine("'Disk PNP ID: " + disk.pnpId)
+                .AppendLine("'Blocksize: " + FormatSize(blocksize_b))
+                .AppendLine("'Testsize: " + FormatSize(testsize_b))
+                .AppendLine("'Free disk space: " + FormatSize(free))
+                .AppendLine("'Total disk space: " + FormatSize(total));
                 if (howLong > 0)
                     header.AppendLine("'Running test for " + howLong + " minute(s)");
                 else
