@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Timers;
+using System.Xml;
 
 namespace SSDStressTest
 {
@@ -27,24 +28,39 @@ namespace SSDStressTest
         private static long blocksize_b = 0;
         private static long testsize_b = 0;
         private static List<String> smartParams = new List<String>();
+        private static string hdSentinelDriveId = "";
 
         private static StreamWriter logfile;
         private static CultureInfo us = new CultureInfo("en-US");
 
         private static void queryData(object source, ElapsedEventArgs e)
         {
-            SmartTools.loadSmartData(disk, !fourBytes);
-            StringBuilder logstring = new StringBuilder();
+            if (smartParams.Count > 0)
+                SmartTools.loadSmartData(disk, !fourBytes);
 
+            StringBuilder logstring = new StringBuilder();
             logstring.Append((DateTime.Now - start_time).TotalSeconds.ToString(us)).Append(",");
             logstring.Append(worker.GetWrittenMBytes().ToString(us)).Append(",");
             logstring.Append(worker.GetPerformance().ToString(us)).Append(",");
             logstring.Append(worker.GetInstPerformance().ToString(us)).Append(",");
-            for (int i = 0; i < smartParams.Count; i++)
+
+            if (smartParams.Count > 0)
             {
-                logstring.Append(disk.smartData[smartParams[i]]);
-                if (i < smartParams.Count - 1)
-                    logstring.Append(",");
+                for (int i = 0; i < smartParams.Count; i++)
+                {
+                    logstring.Append(disk.smartData[smartParams[i]]);
+                    if (i < smartParams.Count - 1)
+                        logstring.Append(",");
+                }
+            }
+            else
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load("HDSentinel.xml");
+                XmlNode node = doc.DocumentElement.SelectSingleNode(
+                    "/Hard_Disk_Sentinel/Physical_Disk_Information_Disk_" + hdSentinelDriveId +
+                    "/Hard_Disk_Summary/Current_Temperature");
+                logstring.Append(node.InnerText.Substring(0, node.InnerText.Length - 3));
             }
             logstring.Append(Environment.NewLine);
 
@@ -117,8 +133,11 @@ namespace SSDStressTest
                 { "d|drive=", "Drive letter to test (REQUIRED)",
                   v => driveLetter = v.ToUpper() },
 
-                { "s|smart:", "SMART value to log (REQUIRED)\nWithout value, available values are listed",
+                { "s|smart:", "SMART value to log",
                   v => smartParams.Add(v) },
+
+                { "x|xml:", "Use HDSentinel.xml, specify drive Id to use",
+                  v => hdSentinelDriveId = v },
 
                 { "4|four", "Interpret SMART values as 4 bytes\n(otherwise 2, default)",
                   v => fourBytes = v != null},
@@ -248,7 +267,7 @@ namespace SSDStressTest
                 }
             }
 
-            if (!show_help && smartParams.Count == 0)
+            if (!show_help && smartParams.Count == 0 && hdSentinelDriveId.Length == 0)
             {
                 Console.WriteLine("Listing available SMART parameters");
                 Console.WriteLine();
@@ -305,19 +324,24 @@ namespace SSDStressTest
 
                 StringBuilder header = new StringBuilder();
                 header.AppendLine("'Log file name: " + outputFile)
-                .AppendLine("'Logging started on " + DateTime.Now)
-                .AppendLine("'Product name: " + disk.productName)
-                .AppendLine("'Disk PNP ID: " + disk.pnpId)
-                .AppendLine("'Blocksize: " + FormatSize(blocksize_b))
-                .AppendLine("'Testsize: " + FormatSize(testsize_b))
-                .AppendLine("'Free disk space: " + FormatSize(free))
-                .AppendLine("'Total disk space: " + FormatSize(total));
+                    .AppendLine("'Logging started on " + DateTime.Now)
+                    .AppendLine("'Product name: " + disk.productName)
+                    .AppendLine("'Disk PNP ID: " + disk.pnpId)
+                    .AppendLine("'Blocksize: " + FormatSize(blocksize_b))
+                    .AppendLine("'Testsize: " + FormatSize(testsize_b))
+                    .AppendLine("'Free disk space: " + FormatSize(free))
+                    .AppendLine("'Total disk space: " + FormatSize(total));
+
                 if (howLong > 0)
                     header.AppendLine("'Running test for " + howLong + " minute(s)");
                 else
                     header.AppendLine("'Running test until stopped (press ESC).");
-                header.AppendLine("Time,MBytesWritten,Performance,InstPerformance,"
-                    + String.Join(",", smartParams));
+
+                if (smartParams.Count > 0)
+                    header.AppendLine("Time,MBytesWritten,Performance,InstPerformance,"
+                        + String.Join(",", smartParams));
+                else
+                    header.AppendLine("Time,MBytesWritten,Performance,InstPerformance,Temperature");
 
                 string s = header.ToString();
                 logfile.Write(s);
