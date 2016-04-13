@@ -130,16 +130,16 @@ namespace SSDStressTest
 
             var p = new OptionSet() 
             {
-                { "d|drive=", "Drive letter to test (REQUIRED)",
+                { "d|drive=", "Drive letter to test (always required)",
                   v => driveLetter = v.ToUpper() },
 
-                { "s|smart:", "SMART value to log",
+                { "s|smart:", "SMART value to log / list available values",
                   v => smartParams.Add(v) },
 
-                { "x|xml:", "Use HDSentinel.xml, specify drive Id to use",
+                { "x|xml=", "Use HDSentinel.xml, specify drive Id to use",
                   v => hdSentinelDriveId = v },
 
-                { "4|four", "Interpret SMART values as 4 bytes\n(otherwise 2, default)",
+                { "4|four", "Interpret SMART values as 4 (not 2) bytes",
                   v => fourBytes = v != null},
 
                 { "i|interval=",
@@ -148,7 +148,7 @@ namespace SSDStressTest
                   (int v) => timeOut = v },
 
                 { "l|limit=",
-                    String.Format("Time in minutes to run the test\nZero means indefinite (default {0})",
+                    String.Format("Time in minutes to run the test\n(0 = run until stopped, default {0})",
                     limit_default),
                   (int v) => howLong = v },
 
