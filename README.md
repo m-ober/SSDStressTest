@@ -1,6 +1,6 @@
 # SSDStressTest
 
-Solid State Drive (SSD) Stress Testing Tool. Continuously write to the drive while monitoring one or more SMART values.
+Solid State Drive (SSD) Stress Testing Tool. Continuously write to the drive while monitoring one or more SMART values. The tool Hard Disk Sentinel is also supported for monitoring where SMART values are not available via WMI.
 
 ![Example](http://www.hardwareluxx.de/images/stories/galleries/reviews/samsung-sm951/temperature/en_sm951-no-cooling-500.png)
 
