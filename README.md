@@ -7,19 +7,19 @@ Solid State Drive (SSD) Stress Testing Tool. Continuously write to the drive whi
 ## Usage
 _WARNING! Using this tool will degrade the lifespan of your drive. Also this tool may heat up the drive until it fails. Use at your own risk and only if you know what you are doing._
 
-    -d, --drive=VALUE          Drive letter to test (REQUIRED)
-    -s, --smart[=VALUE]        SMART value to log (REQUIRED)
-                                 Without value, available values are listed
-    -4, --four                 Interpret SMART values as 4 bytes
-                                 (otherwise 2, default)
+    -d, --drive=VALUE          Drive letter to test (always required)
+    -s, --smart[=VALUE]        SMART value to log / list available values
+    -x, --xml=VALUE            Use HDSentinel.xml, specify drive Id to use
+    -4, --four                 Interpret SMART values as 4 (not 2) bytes
     -i, --interval=VALUE       Timeout between measurements (in ms)
-                                 Must be >= 500 (default 2000)
+                                Must be >= 500 (default 2000)
     -l, --limit=VALUE          Time in minutes to run the test
-                                 Zero means indefinite (default 1)
+                                (0 = run until stopped, default 1)
     -b, --blocksize=VALUE      Blocksize in K/M/G Byte (default 16 MByte)
     -t, --testsize=VALUE       Testsize in K/M/G Byte (default 512 MByte)
     -o, --output=VALUE         Output CSV file name
     -h, --help                 Show help
+
     
 ### Example
 Starting the tool using:
@@ -50,8 +50,6 @@ Use the tool of your choice to plot this data.
 ### Download
 
 Binaries can be found here: https://github.com/m-ober/SSDStressTest/releases
-
-(.NET 4.0 required)
 
 ## License
 This project is partially based on the work from other people.
