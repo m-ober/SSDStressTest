@@ -22,30 +22,19 @@ _WARNING! Using this tool will degrade the lifespan of your drive. Also this too
 
     
 ### Example
-Starting the tool using:
+*Monitor the drive using SMART:*
 
-    SSDStressTest.exe --drive=C --smart=PowerOnHoursPOH --blocksize=8m --interval=10000
+    SSDStressTest.exe --drive=C --smart=Temperature --blocksize=8m --interval=10000
     
-Will test drive/partition C: and monitor the SMART values "PowerOnHoursPOH" and "PowerCycleCount" (just for an example, monitoring these values is pointless.). An output file will then be generated:
+This command will test drive/partition C: and monitor the SMART value "Temperature". The write requests will have a size of 8M and performance and SMART values are measured every 10 seconds.
 
-    'Log file name: Corsair_Performance_Pro_0.csv
-    'Logging started on 04.08.2015 17:23:16
-    'Product name: Corsair Performance Pro
-    'Disk PNP ID: IDE\DISKCORSAIR_PERFORMANCE_PRO_________________1.0_____\5&61C381C&0&0.0.0
-    'Blocksize: 8 MByte
-    'Testsize: 512 MByte
-    'Free disk space: 86.646 GByte
-    'Total disk space: 238.374 GByte
-    'Running test for 1 minute(s)
-    Time,MBytesWritten,Performance,InstPerformance,PowerOnHoursPOH
-    10.0915772,1712,173.89,173.89,4032
-    20.0781484,3456,174.03,174.18,4032
-    30.1017217,4864,162.82,140.58,4032
-    40.1002936,6712,168.28,184.59,4032
-    50.0968654,8320,166.84,161.08,4032
-    60.1584409,9168,153.82,87.11,4032
+*Monitor the drive using Hard Disk Sentinel:*
+
+    SSDStressTest.exe --drive=C --xml=3
     
-Use the tool of your choice to plot this data.
+Test drive/partition C: and monitor the Temperature of the (third) drive as reported by Hard Disk Sentinel. The file HDSentinel.xml needs to be placed in the same directory as the SSDStressTest executable.
+
+The `--smart` and `--xml` cannot be used at the same time. Or to be more precise, if `--smart` is given, the `--xml` is ignored.
 
 ### Download
 
