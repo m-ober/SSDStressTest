@@ -21,20 +21,20 @@ _WARNING! Using this tool will degrade the lifespan of your drive. Also this too
     -h, --help                 Show help
 
     
-### Example
-*Monitor the drive using SMART:*
+### Examples
+#### Monitor the drive using SMART:
 
     SSDStressTest.exe --drive=C --smart=Temperature --blocksize=8m --interval=10000
     
 This command will test drive/partition C: and monitor the SMART value "Temperature". The write requests will have a size of 8M and performance and SMART values are measured every 10 seconds.
 
-*Monitor the drive using Hard Disk Sentinel:*
+#### Monitor the drive using Hard Disk Sentinel:
 
     SSDStressTest.exe --drive=C --xml=3
     
 Test drive/partition C: and monitor the Temperature of the (third) drive as reported by Hard Disk Sentinel. The file HDSentinel.xml needs to be placed in the same directory as the SSDStressTest executable.
 
-The `--smart` and `--xml` cannot be used at the same time. Or to be more precise, if `--smart` is given, the `--xml` is ignored.
+*Note*: If `--smart` is given, the `--xml` switch is ignored, i.e. they cannot be used at the same time.
 
 ### Download
 
