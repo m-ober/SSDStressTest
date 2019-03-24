@@ -20,18 +20,18 @@ _WARNING! Using this tool will degrade the lifespan of your drive. Also this too
     -o, --output=VALUE         Output CSV file name
     -h, --help                 Show help
 
-    
+
 ### Examples
 #### Monitor the drive using SMART:
 
     SSDStressTest.exe --drive=C --smart=Temperature --blocksize=8m --interval=10000
-    
+
 This command will test drive/partition C: and monitor the SMART value "Temperature". The write requests will have a size of 8M and performance and SMART values are measured every 10 seconds.
 
 #### Monitor the drive using Hard Disk Sentinel:
 
     SSDStressTest.exe --drive=C --xml=3
-    
+
 Test drive/partition C: and monitor the Temperature of the (third) drive as reported by Hard Disk Sentinel. The file HDSentinel.xml needs to be placed in the same directory as the SSDStressTest executable.
 
 *Note*: If `--smart` is given, the `--xml` switch is ignored, i.e. they cannot be used at the same time.
@@ -45,13 +45,11 @@ This project is partially based on the work from other people.
 ### SmartTools.cs (modified)
 (C) Microsoft Corporation, Author: Clemens Vasters (clemensv@microsoft.com)
 
-Code subject to MS-PL: http://opensource.org/licenses/ms-pl.html 
+Code subject to MS-PL: http://opensource.org/licenses/ms-pl.html
 
 ### Options.cs
 
 Copyright (C) 2008 Novell (http://www.novell.com), Copyright (C) 2009 Federico Di Gregorio, Copyright (C) 2012 Xamarin Inc (http://www.xamarin.com)
 
-### Icon 
-License: Creative Commons (Attribution 3.0 Unported)
-
-https://www.iconfinder.com/icons/289617/fire_flame_match_icon#size=128
+### Icon
+Icon made by [Vectors Market](https://www.flaticon.com/authors/vectors-market) from [www.flaticon.com](https://www.flaticon.com/). 

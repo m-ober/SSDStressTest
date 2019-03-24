@@ -29,13 +29,14 @@ namespace SSDStressTest
         private static long testsize_b = 0;
         private static List<String> smartParams = new List<String>();
         private static string hdSentinelDriveId = "";
+        private static bool disableWmi = false;
 
         private static StreamWriter logfile;
         private static CultureInfo us = new CultureInfo("en-US");
 
         private static void queryData(object source, ElapsedEventArgs e)
         {
-            if (smartParams.Count > 0)
+            if (smartParams.Count > 0 && !disableWmi)
                 SmartTools.loadSmartData(disk, !fourBytes);
 
             StringBuilder logstring = new StringBuilder();
@@ -44,7 +45,7 @@ namespace SSDStressTest
             logstring.Append(worker.GetPerformance().ToString(us)).Append(",");
             logstring.Append(worker.GetInstPerformance().ToString(us)).Append(",");
 
-            if (smartParams.Count > 0)
+            if (smartParams.Count > 0 && !disableWmi)
             {
                 for (int i = 0; i < smartParams.Count; i++)
                 {
@@ -53,7 +54,7 @@ namespace SSDStressTest
                         logstring.Append(",");
                 }
             }
-            else
+            else if (hdSentinelDriveId.Length > 0)
             {
                 XmlDocument doc = new XmlDocument();
                 doc.Load("HDSentinel.xml");
@@ -61,6 +62,9 @@ namespace SSDStressTest
                     "/Hard_Disk_Sentinel/Physical_Disk_Information_Disk_" + hdSentinelDriveId +
                     "/Hard_Disk_Summary/Current_Temperature");
                 logstring.Append(node.InnerText.Substring(0, node.InnerText.Length - 3));
+            } else
+            {
+                logstring.Append("NO_DATA");
             }
             logstring.Append(Environment.NewLine);
 
@@ -139,6 +143,9 @@ namespace SSDStressTest
                 { "x|xml=", "Use HDSentinel.xml, specify drive Id to use",
                   v => hdSentinelDriveId = v },
 
+                { "w|disablewmi", "Do not query WMI",
+                  v => disableWmi = v != null},
+
                 { "4|four", "Interpret SMART values as 4 (not 2) bytes",
                   v => fourBytes = v != null},
 
@@ -212,6 +219,13 @@ namespace SSDStressTest
                 show_help = true;
             }
 
+            if (disableWmi && smartParams.Count > 0)
+            {
+                Console.WriteLine("WMI is disabled, cannot read SMART values.");
+                Console.WriteLine("Please remove all SMART parameters and/or use the XML option.");
+                show_help = true;
+            }
+
             if (!show_help)
             {
                 try
@@ -222,12 +236,12 @@ namespace SSDStressTest
                 {
                     Console.WriteLine("Could not open drive " + driveLetter + ":");
                     Console.WriteLine("Error Message: " + e.Message);
-                    //WmiTools.ListAllDisks();
+                    WmiTools.ListAllDisks();
                     show_help = true;
                 }
             }
 
-            if (!show_help)
+            if (!show_help && !disableWmi)
             {
                 try
                 {
@@ -267,7 +281,7 @@ namespace SSDStressTest
                 }
             }
 
-            if (!show_help && smartParams.Count == 0 && hdSentinelDriveId.Length == 0)
+            if (!show_help && smartParams.Count == 0 && hdSentinelDriveId.Length == 0 && !disableWmi)
             {
                 Console.WriteLine("Listing available SMART parameters");
                 Console.WriteLine();
