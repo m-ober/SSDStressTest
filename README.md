@@ -10,6 +10,7 @@ _WARNING! Using this tool will degrade the lifespan of your drive. Also this too
     -d, --drive=VALUE          Drive letter to test (always required)
     -s, --smart[=VALUE]        SMART value to log / list available values
     -x, --xml=VALUE            Use HDSentinel.xml, specify drive Id to use
+    -w, --disablewmi           Do not query WMI    
     -4, --four                 Interpret SMART values as 4 (not 2) bytes
     -i, --interval=VALUE       Timeout between measurements (in ms)
                                 Must be >= 500 (default 2000)
@@ -35,6 +36,8 @@ This command will test drive/partition C: and monitor the SMART value "Temperatu
 Test drive/partition C: and monitor the Temperature of the (third) drive as reported by Hard Disk Sentinel. The file HDSentinel.xml needs to be placed in the same directory as the SSDStressTest executable.
 
 *Note*: If `--smart` is given, the `--xml` switch is ignored, i.e. they cannot be used at the same time.
+
+*Note*: If you get unexplainable errors regarding WMI, try the `--disablewmi` switch. Note that the `--smart` option will no longer work without WMI. You can still use the `--xml` option or use the tool without monitoring the drive SMART values.
 
 ### Download
 
